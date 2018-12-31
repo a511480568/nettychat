@@ -1,5 +1,6 @@
 package com.yashon.chat.controller;
 
+import com.yashon.chat.enums.OperatorFriendRequestTypeEnum;
 import com.yashon.chat.enums.SearchFriendsStatusEnum;
 import com.yashon.chat.pojo.Users;
 import com.yashon.chat.service.UserService;
@@ -105,5 +106,28 @@ public class UserController {
 
         System.out.println(userService.queryFriendRequestList(userId));
         return JSONResult.ok(userService.queryFriendRequestList(userId));
+    }
+
+    @RequestMapping(value = "/users/operFriendRequest")
+    public JSONResult operFriendRequest(@RequestParam("acceptUserId") String acceptUserId,@RequestParam(
+            "sendUserId") String sendUserId,@RequestParam("operType") Integer operType){
+
+        if(StringUtils.isBlank(acceptUserId) || StringUtils.isBlank(sendUserId) || null == operType){
+            return JSONResult.errorMsg("");
+        }
+
+        if(StringUtils.isBlank(OperatorFriendRequestTypeEnum.getMsgByType(operType))){
+            return JSONResult.errorMsg("");
+        }
+
+        if(OperatorFriendRequestTypeEnum.IGNORE.type.intValue() == operType){
+            //忽略好友
+            userService.delteFriendRequest(sendUserId,acceptUserId);
+        }else {
+            //通过好友
+            userService.passFriendRequest(sendUserId,acceptUserId);
+        }
+
+        return JSONResult.ok();
     }
 }

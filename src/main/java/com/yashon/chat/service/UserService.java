@@ -35,4 +35,13 @@ public interface UserService {
     void addFriend(String myUserId,String friendsUserName);
 
     List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
+
+    /**
+     * 删除好友请求记录
+     * @param sendUserId
+     * @param acceptUserId
+     */
+    void delteFriendRequest(String sendUserId,String acceptUserId);
+
+    void passFriendRequest(String sendUserId,String acceptUserId);
 }

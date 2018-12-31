@@ -142,4 +142,31 @@ public class UserServiceImpl implements UserService {
     public List<FriendRequestVO> queryFriendRequestList(String acceptUserId) {
         return usersMapperCustom.queryFriendRequestList(acceptUserId);
     }
+
+    @Override
+    public void delteFriendRequest(String sendUserId, String acceptUserId) {
+        FriendRequest fr = new FriendRequest();
+        fr.setAcceptUserId(acceptUserId);
+        fr.setSendUserId(sendUserId);
+        friendRequestMapper.delete(fr);
+    }
+
+    @Override
+    public void passFriendRequest(String sendUserId, String acceptUserId) {
+
+        saveFriends(sendUserId,acceptUserId);
+
+        saveFriends(acceptUserId,sendUserId);
+
+        //删除好友记录
+        delteFriendRequest(sendUserId,acceptUserId);
+    }
+
+    private void saveFriends(String sendUserId, String acceptUserId){
+        MyFriends mf = new MyFriends();
+        mf.setId(sid.nextShort());
+        mf.setMyUserId(sendUserId);
+        mf.setMyFriendUserId(acceptUserId);
+        myFriendsMapper.insert(mf);
+    }
 }
