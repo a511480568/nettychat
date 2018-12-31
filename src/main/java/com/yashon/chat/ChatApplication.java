@@ -14,8 +14,8 @@ import tk.mybatis.spring.annotation.MapperScan;
  **/
 
 @SpringBootApplication
-@MapperScan(basePackages = "com.yashon.mapper")
-@ComponentScan(basePackages = {"com.yashon.chat"})
+@MapperScan(basePackages = "com.yashon.chat.mapper")
+@ComponentScan(basePackages = {"com.yashon.chat","org.n3r.idworker"})
 public class ChatApplication {
 
     public static void main(String[] args) {
