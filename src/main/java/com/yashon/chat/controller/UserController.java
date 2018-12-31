@@ -1,5 +1,6 @@
 package com.yashon.chat.controller;
 
+import com.yashon.chat.enums.SearchFriendsStatusEnum;
 import com.yashon.chat.pojo.Users;
 import com.yashon.chat.service.UserService;
 import com.yashon.chat.utils.JSONResult;
@@ -9,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -56,5 +58,41 @@ public class UserController {
 
         Users newUser = userService.updateUserNickName(users);
         return JSONResult.ok(newUser);
+    }
+
+    @RequestMapping(value = "/users/search")
+    public JSONResult searchUser(@RequestParam("myUserId") String myUserId,@RequestParam("friendUsername")  String friendUsername){
+        if(StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
+            return JSONResult.errorMsg("");
+        }
+
+        Integer res = userService.preconditionSearchFriends(myUserId, friendUsername);
+        if(res == 0){
+            //可以添加好友
+            Users friendUser = userService.queryUserByUserName(friendUsername);
+            return JSONResult.ok(friendUser);
+        }else{
+            String msg = SearchFriendsStatusEnum.getMsgByKey(res);
+            return JSONResult.errorMsg(msg);
+        }
+
+    }
+
+    @RequestMapping(value = "/users/addFriend")
+    public JSONResult addFriend(@RequestParam("myUserId") String myUserId,@RequestParam("friendUsername")  String friendUsername){
+        if(StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername)){
+            return JSONResult.errorMsg("");
+        }
+
+        Integer res = userService.preconditionSearchFriends(myUserId, friendUsername);
+        if(res == 0){
+            //添加好友
+            userService.addFriend(myUserId,friendUsername);
+            return JSONResult.ok();
+        }else{
+            String msg = SearchFriendsStatusEnum.getMsgByKey(res);
+            return JSONResult.errorMsg(msg);
+        }
+
     }
 }

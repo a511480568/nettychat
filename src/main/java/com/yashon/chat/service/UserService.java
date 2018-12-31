@@ -18,4 +18,16 @@ public interface UserService {
     Users regist(Users users) throws Exception;
 
     Users updateUserNickName(Users users);
+
+    /**
+     * 搜索用户
+     * @param myUserId
+     * @param friendsUserName
+     * @return
+     */
+    Integer preconditionSearchFriends(String myUserId,String friendsUserName);
+
+    Users queryUserByUserName(String userName);
+
+    void addFriend(String myUserId,String friendsUserName);
 }

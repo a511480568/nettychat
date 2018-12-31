@@ -1,6 +1,11 @@
 package com.yashon.chat.service.impl;
 
+import com.yashon.chat.enums.SearchFriendsStatusEnum;
+import com.yashon.chat.mapper.FriendRequestMapper;
+import com.yashon.chat.mapper.MyFriendsMapper;
 import com.yashon.chat.mapper.UsersMapper;
+import com.yashon.chat.pojo.FriendRequest;
+import com.yashon.chat.pojo.MyFriends;
 import com.yashon.chat.pojo.Users;
 import com.yashon.chat.service.UserService;
 import com.yashon.chat.utils.MD5Utils;
@@ -8,6 +13,9 @@ import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @ClassName UserServiceImpl
@@ -21,6 +29,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private MyFriendsMapper myFriendsMapper;
+    @Autowired
+    private FriendRequestMapper friendRequestMapper;
     @Autowired
     private Sid sid;
 
@@ -65,5 +77,60 @@ public class UserServiceImpl implements UserService {
     public Users updateUserNickName(Users users) {
         usersMapper.updateByPrimaryKeySelective(users);
         return usersMapper.selectByPrimaryKey(users.getId());
+    }
+
+    @Override
+    public Integer preconditionSearchFriends(String myUserId, String friendsUserName) {
+        boolean b = queryUserNameIsExist(friendsUserName);
+        if(!b){
+            //用户不存在
+            return SearchFriendsStatusEnum.USER_NOT_EXIST.status;
+        }
+        Users user = new Users();
+        user.setUserName(friendsUserName);
+        Users users = usersMapper.selectOne(user);
+        if(myUserId.equals(users.getId())){
+            //不能添加自己
+            return SearchFriendsStatusEnum.NOT_YOURSELF.status;
+        }
+
+        MyFriends myFriends = new MyFriends();
+        myFriends.setMyFriendUserId(users.getId());
+        myFriends.setMyUserId(myUserId);
+        List<MyFriends> list = myFriendsMapper.select(myFriends);
+        if(!list.isEmpty()){
+            //用户已是自己好友不能再添加
+            return SearchFriendsStatusEnum.ALREADY_FRIENDS.status;
+        }
+        return SearchFriendsStatusEnum.SUCCESS.status;
+    }
+
+    @Override
+    public Users queryUserByUserName(String userName) {
+        Users user = new Users();
+        user.setUserName(userName);
+        return usersMapper.selectOne(user);
+    }
+
+    @Override
+    public void addFriend(String myUserId, String friendsUserName) {
+
+        Users friendUser = queryUserByUserName(friendsUserName);
+
+        //判断是否曾经加过好友
+        FriendRequest request = new FriendRequest();
+        request.setSendUserId(myUserId);
+        request.setAcceptUserId(friendUser.getId());
+
+        FriendRequest friendRequest = friendRequestMapper.selectOne(request);
+
+        if(null == friendRequest){
+            FriendRequest fr = new FriendRequest();
+            fr.setSendUserId(myUserId);
+            fr.setAcceptUserId(friendUser.getId());
+            fr.setId(sid.nextShort());
+            fr.setRequestDateTime(new Date());
+            friendRequestMapper.insert(fr);
+        }
     }
 }
