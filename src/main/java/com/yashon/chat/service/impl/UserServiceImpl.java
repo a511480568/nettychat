@@ -4,11 +4,13 @@ import com.yashon.chat.enums.SearchFriendsStatusEnum;
 import com.yashon.chat.mapper.FriendRequestMapper;
 import com.yashon.chat.mapper.MyFriendsMapper;
 import com.yashon.chat.mapper.UsersMapper;
+import com.yashon.chat.mapper.UsersMapperCustom;
 import com.yashon.chat.pojo.FriendRequest;
 import com.yashon.chat.pojo.MyFriends;
 import com.yashon.chat.pojo.Users;
 import com.yashon.chat.service.UserService;
 import com.yashon.chat.utils.MD5Utils;
+import com.yashon.chat.vo.FriendRequestVO;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ public class UserServiceImpl implements UserService {
     private MyFriendsMapper myFriendsMapper;
     @Autowired
     private FriendRequestMapper friendRequestMapper;
+    @Autowired
+    private UsersMapperCustom usersMapperCustom;
     @Autowired
     private Sid sid;
 
@@ -132,5 +136,10 @@ public class UserServiceImpl implements UserService {
             fr.setRequestDateTime(new Date());
             friendRequestMapper.insert(fr);
         }
+    }
+
+    @Override
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId) {
+        return usersMapperCustom.queryFriendRequestList(acceptUserId);
     }
 }

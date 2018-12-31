@@ -34,4 +34,14 @@ public class FriendRequestVO {
 	public void setSendNickname(String sendNickname) {
 		this.sendNickname = sendNickname;
 	}
+
+	@Override
+	public String toString() {
+		return "FriendRequestVO{" +
+				"sendUserId='" + sendUserId + '\'' +
+				", sendUsername='" + sendUsername + '\'' +
+				", sendFaceImage='" + sendFaceImage + '\'' +
+				", sendNickname='" + sendNickname + '\'' +
+				'}';
+	}
 }

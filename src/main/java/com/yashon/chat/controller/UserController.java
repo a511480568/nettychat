@@ -95,4 +95,15 @@ public class UserController {
         }
 
     }
+
+    @RequestMapping(value = "/users/queryFriendsRequests")
+    public JSONResult queryFriendsRequests(@RequestParam("userId") String userId){
+
+        if(StringUtils.isBlank(userId)){
+           return JSONResult.errorMsg("");
+        }
+
+        System.out.println(userService.queryFriendRequestList(userId));
+        return JSONResult.ok(userService.queryFriendRequestList(userId));
+    }
 }

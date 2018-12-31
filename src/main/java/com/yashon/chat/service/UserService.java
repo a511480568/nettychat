@@ -1,6 +1,9 @@
 package com.yashon.chat.service;
 
 import com.yashon.chat.pojo.Users;
+import com.yashon.chat.vo.FriendRequestVO;
+
+import java.util.List;
 
 /**
  * @ClassName UserService
@@ -30,4 +33,6 @@ public interface UserService {
     Users queryUserByUserName(String userName);
 
     void addFriend(String myUserId,String friendsUserName);
+
+    List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
 }
