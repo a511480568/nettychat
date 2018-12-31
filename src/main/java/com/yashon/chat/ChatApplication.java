@@ -1,7 +1,9 @@
 package com.yashon.chat;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import tk.mybatis.spring.annotation.MapperScan;
 
 /**
  * @ClassName ChatApplication
@@ -12,6 +14,11 @@ import org.springframework.context.annotation.ComponentScan;
  **/
 
 @SpringBootApplication
+@MapperScan(basePackages = "com.yashon.mapper")
 @ComponentScan(basePackages = {"com.yashon.chat"})
 public class ChatApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ChatApplication.class,args);
+    }
 }
