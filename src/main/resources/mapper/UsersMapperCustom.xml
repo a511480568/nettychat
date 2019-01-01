@@ -27,9 +27,9 @@
 		
 		select 
 			u.id as friendUserId,
-			u.username as friendUsername,
+			u.user_name as friendUsername,
 			u.face_image as friendFaceImage,
-			u.nickname as friendNickname
+			u.nick_name as friendNickname
 		from
 			my_friends mf
 		left join 

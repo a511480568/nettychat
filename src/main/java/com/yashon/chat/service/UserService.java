@@ -1,7 +1,9 @@
 package com.yashon.chat.service;
 
+import com.yashon.chat.netty.ChatMsg;
 import com.yashon.chat.pojo.Users;
 import com.yashon.chat.vo.FriendRequestVO;
+import com.yashon.chat.vo.MyFriendsVO;
 
 import java.util.List;
 
@@ -44,4 +46,10 @@ public interface UserService {
     void delteFriendRequest(String sendUserId,String acceptUserId);
 
     void passFriendRequest(String sendUserId,String acceptUserId);
+
+    List<MyFriendsVO> queryAllFriendsByUserId(String userId);
+
+    String saveMessage(ChatMsg chatMsg);
+
+    void updateSignedMsg(List<String> msgIdList);
 }

@@ -130,4 +130,14 @@ public class UserController {
 
         return JSONResult.ok();
     }
+
+    @RequestMapping(value = "/users/myFriends")
+    public JSONResult queryAllFriendsByUserId(@RequestParam("userId") String userId){
+
+        if(StringUtils.isBlank(userId)){
+            return JSONResult.errorMsg("");
+        }
+
+        return JSONResult.ok(userService.queryAllFriendsByUserId(userId));
+    }
 }

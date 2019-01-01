@@ -1,16 +1,16 @@
 package com.yashon.chat.service.impl;
 
+import com.yashon.chat.enums.MsgSignFlagEnum;
 import com.yashon.chat.enums.SearchFriendsStatusEnum;
-import com.yashon.chat.mapper.FriendRequestMapper;
-import com.yashon.chat.mapper.MyFriendsMapper;
-import com.yashon.chat.mapper.UsersMapper;
-import com.yashon.chat.mapper.UsersMapperCustom;
+import com.yashon.chat.mapper.*;
+import com.yashon.chat.netty.ChatMsg;
 import com.yashon.chat.pojo.FriendRequest;
 import com.yashon.chat.pojo.MyFriends;
 import com.yashon.chat.pojo.Users;
 import com.yashon.chat.service.UserService;
 import com.yashon.chat.utils.MD5Utils;
 import com.yashon.chat.vo.FriendRequestVO;
+import com.yashon.chat.vo.MyFriendsVO;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +38,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UsersMapperCustom usersMapperCustom;
     @Autowired
+    private ChatMsgMapper chatMsgMapper;
+    @Autowired
     private Sid sid;
 
     @Override
@@ -55,8 +57,8 @@ public class UserServiceImpl implements UserService {
         Example example = new Example(Users.class);
         Example.Criteria criteria = example.createCriteria();
 
-        criteria.andEqualTo("userName",userName);
-        criteria.andEqualTo("password",MD5Utils.getMD5Str(password));
+        criteria.andEqualTo("userName", userName);
+        criteria.andEqualTo("password", MD5Utils.getMD5Str(password));
 
         Users users = usersMapper.selectOneByExample(example);
 
@@ -86,14 +88,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public Integer preconditionSearchFriends(String myUserId, String friendsUserName) {
         boolean b = queryUserNameIsExist(friendsUserName);
-        if(!b){
+        if (!b) {
             //用户不存在
             return SearchFriendsStatusEnum.USER_NOT_EXIST.status;
         }
         Users user = new Users();
         user.setUserName(friendsUserName);
         Users users = usersMapper.selectOne(user);
-        if(myUserId.equals(users.getId())){
+        if (myUserId.equals(users.getId())) {
             //不能添加自己
             return SearchFriendsStatusEnum.NOT_YOURSELF.status;
         }
@@ -102,7 +104,7 @@ public class UserServiceImpl implements UserService {
         myFriends.setMyFriendUserId(users.getId());
         myFriends.setMyUserId(myUserId);
         List<MyFriends> list = myFriendsMapper.select(myFriends);
-        if(!list.isEmpty()){
+        if (!list.isEmpty()) {
             //用户已是自己好友不能再添加
             return SearchFriendsStatusEnum.ALREADY_FRIENDS.status;
         }
@@ -128,7 +130,7 @@ public class UserServiceImpl implements UserService {
 
         FriendRequest friendRequest = friendRequestMapper.selectOne(request);
 
-        if(null == friendRequest){
+        if (null == friendRequest) {
             FriendRequest fr = new FriendRequest();
             fr.setSendUserId(myUserId);
             fr.setAcceptUserId(friendUser.getId());
@@ -154,15 +156,39 @@ public class UserServiceImpl implements UserService {
     @Override
     public void passFriendRequest(String sendUserId, String acceptUserId) {
 
-        saveFriends(sendUserId,acceptUserId);
+        saveFriends(sendUserId, acceptUserId);
 
-        saveFriends(acceptUserId,sendUserId);
+        saveFriends(acceptUserId, sendUserId);
 
         //删除好友记录
-        delteFriendRequest(sendUserId,acceptUserId);
+        delteFriendRequest(sendUserId, acceptUserId);
     }
 
-    private void saveFriends(String sendUserId, String acceptUserId){
+    @Override
+    public List<MyFriendsVO> queryAllFriendsByUserId(String userId) {
+        return usersMapperCustom.queryMyFriends(userId);
+    }
+
+    @Override
+    public String saveMessage(ChatMsg chatMsg) {
+        com.yashon.chat.pojo.ChatMsg msg = new com.yashon.chat.pojo.ChatMsg();
+        String id = sid.nextShort();
+        msg.setId(id);
+        msg.setAcceptUserId(chatMsg.getReceiverId());
+        msg.setSendUserId(chatMsg.getSenderId());
+        msg.setCreateTime(new Date());
+        msg.setMsg(chatMsg.getMsg());
+        msg.setSignFlag(MsgSignFlagEnum.unsign.type);
+        chatMsgMapper.insert(msg);
+        return id;
+    }
+
+    @Override
+    public void updateSignedMsg(List<String> msgIdList) {
+        usersMapperCustom.batchUpdateMsgSigned(msgIdList);
+    }
+
+    private void saveFriends(String sendUserId, String acceptUserId) {
         MyFriends mf = new MyFriends();
         mf.setId(sid.nextShort());
         mf.setMyUserId(sendUserId);
